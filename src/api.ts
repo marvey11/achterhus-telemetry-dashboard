@@ -22,8 +22,7 @@ export interface ServiceOverview {
   failed_runs: number;
 }
 
-const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL ??
-  "http://localhost:8000") as string;
+const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL ?? "") as string;
 
 export async function fetchOverview(): Promise<ServiceOverview[]> {
   const res = await fetch(`${API_BASE_URL}/api/v1/overview`);
