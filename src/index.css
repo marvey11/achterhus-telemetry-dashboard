@@ -1,1 +1,7 @@
 @import "tailwindcss";
+
+@theme {
+  /* Define custom CSS variables/theme properties */
+  --color-brand-500: #6366f1;
+  --font-mono: "Fira Code", monospace;
+}
