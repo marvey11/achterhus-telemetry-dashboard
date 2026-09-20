@@ -22,6 +22,7 @@ export interface ServiceOverview {
   failed_runs: number;
 }
 
+// Uses current origin/base path if VITE_API_BASE_URL is not set
 const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL ?? "") as string;
 
 export async function fetchOverview(): Promise<ServiceOverview[]> {

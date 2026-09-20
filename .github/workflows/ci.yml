@@ -85,5 +85,7 @@ jobs:
           push: ${{ github.event_name == 'push' }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
+          build-args: |
+            VITE_BASE_PATH=/telemetry-dashboard/
           cache-from: type=gha
           cache-to: type=gha,mode=max
