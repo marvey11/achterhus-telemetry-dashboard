@@ -3,29 +3,43 @@ import {
   QueryClient,
   QueryClientProvider,
   useQuery,
+  useQueryClient,
 } from "@tanstack/react-query";
-import { fetchOverview, fetchRecentRuns } from "./api";
+import { fetchOverview, fetchRecentRuns, RUN_STATUSES } from "./api";
 import { ServiceCard } from "./components/ServiceCard";
 import { RunsTable } from "./components/RunsTable";
 import { Activity, RefreshCw } from "lucide-react";
-import { useIsFetching, useQueryClient } from "@tanstack/react-query";
+import { useIsFetching } from "@tanstack/react-query";
+
+const PAGE_SIZE = 50;
 const queryClient = new QueryClient();
 
 function DashboardContent() {
   const [selectedService, setSelectedService] = useState<string | undefined>(
     undefined,
   );
+  const [selectedStatus, setSelectedStatus] = useState("");
+  const [page, setPage] = useState(1);
 
-  // Poll overview and recent runs every 5000ms
-  const { data: overview, isLoading: overviewLoading } = useQuery({
+  // Poll the overview and current run page every five seconds.
+  const {
+    data: overview,
+    isLoading: overviewLoading,
+    error: overviewError,
+  } = useQuery({
     queryKey: ["overview"],
     queryFn: fetchOverview,
     refetchInterval: 5000,
   });
 
-  const { data: runs, isLoading: runsLoading } = useQuery({
-    queryKey: ["runs", selectedService],
-    queryFn: () => fetchRecentRuns(selectedService),
+  const {
+    data: runs,
+    isLoading: runsLoading,
+    error: runsError,
+  } = useQuery({
+    queryKey: ["runs", selectedService, selectedStatus, page],
+    queryFn: () =>
+      fetchRecentRuns(selectedService, selectedStatus, PAGE_SIZE, page),
     refetchInterval: 5000,
   });
 
@@ -39,18 +53,18 @@ function DashboardContent() {
   };
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-8">
+    <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
       {/* Header */}
-      <header className="flex items-center justify-between mb-8 pb-4 border-b border-slate-800">
+      <header className="mb-8 flex items-center justify-between border-b border-slate-200 pb-5">
         <div className="flex items-center gap-3">
-          <div className="p-2 rounded-xl bg-indigo-500/10 border border-indigo-500/20 text-indigo-400">
+          <div className="rounded-xl border border-indigo-200 bg-indigo-50 p-2 text-indigo-700">
             <Activity className="w-6 h-6" />
           </div>
           <div>
-            <h1 className="text-xl font-bold text-slate-100">
+            <h1 className="text-xl font-bold text-slate-900">
               Execution Telemetry
             </h1>
-            <p className="text-xs text-slate-400">
+            <p className="text-xs text-slate-500">
               Home Server Container Overview
             </p>
           </div>
@@ -58,7 +72,7 @@ function DashboardContent() {
         <button
           disabled={isFetching}
           onClick={handleRefresh}
-          className="flex items-center gap-2 px-3 py-1.5 text-xs font-medium rounded-lg bg-slate-800 hover:bg-slate-700 disabled:opacity-50 text-slate-300 transition-colors"
+          className="flex items-center gap-2 rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs font-medium text-slate-700 shadow-sm transition-colors hover:bg-slate-50 disabled:opacity-50"
         >
           <RefreshCw
             className={`w-3.5 h-3.5 ${isFetching ? "animate-spin" : ""}`}
@@ -69,12 +83,19 @@ function DashboardContent() {
 
       {/* Services Overview Grid */}
       <section className="mb-10">
-        <h2 className="text-sm font-semibold uppercase tracking-wider text-slate-400 mb-4">
+        <h2 className="mb-4 text-sm font-semibold uppercase tracking-wider text-slate-600">
           Services
         </h2>
         {overviewLoading ? (
-          <div className="text-slate-500 text-sm">
+          <div className="text-sm text-slate-500">
             Loading service overview...
+          </div>
+        ) : overviewError ? (
+          <div
+            role="alert"
+            className="rounded-lg border border-rose-200 bg-rose-50 p-3 text-sm text-rose-800"
+          >
+            Unable to load service overview: {overviewError.message}
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -83,7 +104,10 @@ function DashboardContent() {
                 key={s.service_name}
                 service={s}
                 isSelected={selectedService === s.service_name}
-                onSelect={setSelectedService}
+                onSelect={(name) => {
+                  setSelectedService(name);
+                  setPage(1);
+                }}
               />
             ))}
           </div>
@@ -93,7 +117,7 @@ function DashboardContent() {
       {/* Recent Executions Table */}
       <section>
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-sm font-semibold uppercase tracking-wider text-slate-400">
+          <h2 className="text-sm font-semibold uppercase tracking-wider text-slate-600">
             {selectedService !== undefined
               ? `Recent Runs: ${selectedService}`
               : "All Recent Executions"}
@@ -102,20 +126,62 @@ function DashboardContent() {
             <button
               onClick={() => {
                 setSelectedService(undefined);
+                setPage(1);
               }}
-              className="text-xs text-indigo-400 hover:underline"
+              className="text-xs font-medium text-indigo-700 hover:underline"
             >
               Clear Filter
             </button>
           )}
         </div>
 
+        <div className="mb-4 flex flex-wrap items-end gap-3">
+          <label className="flex flex-col gap-1 text-xs font-medium text-slate-600">
+            Status
+            <select
+              value={selectedStatus}
+              onChange={(event) => {
+                setSelectedStatus(event.target.value);
+                setPage(1);
+              }}
+              className="min-w-48 rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-800 shadow-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
+            >
+              <option value="">All statuses</option>
+              {RUN_STATUSES.map((status) => (
+                <option key={status} value={status}>
+                  {status.replaceAll("_", " ")}
+                </option>
+              ))}
+            </select>
+          </label>
+          <div className="flex gap-2 text-xs text-slate-500">
+            <span className="rounded-full border border-indigo-200 bg-indigo-50 px-2.5 py-1 text-indigo-800">
+              In progress: SCHEDULED through RUNNING
+            </span>
+            <span className="rounded-full border border-slate-200 bg-slate-100 px-2.5 py-1 text-slate-700">
+              Terminal: SUCCESS and outcomes
+            </span>
+          </div>
+        </div>
+
         {runsLoading ? (
-          <div className="text-slate-500 text-sm">
+          <div className="text-sm text-slate-500">
             Loading execution logs...
           </div>
+        ) : runsError ? (
+          <div
+            role="alert"
+            className="rounded-lg border border-rose-200 bg-rose-50 p-3 text-sm text-rose-800"
+          >
+            Unable to load runs: {runsError.message}
+          </div>
         ) : (
-          <RunsTable runs={runs ?? []} />
+          <RunsTable
+            runs={runs ?? []}
+            page={page}
+            canGoNext={(runs?.length ?? 0) === PAGE_SIZE}
+            onPageChange={setPage}
+          />
         )}
       </section>
     </div>

@@ -1,6 +1,6 @@
-import React from "react";
-import { type ServiceOverview, type RunStatus } from "../api";
-import { CheckCircle2, AlertCircle, Clock, Loader2 } from "lucide-react";
+import { Clock3 } from "lucide-react";
+import type { ServiceOverview } from "../api";
+import { StatusBadge } from "./StatusBadge";
 
 interface Props {
   service: ServiceOverview;
@@ -8,80 +8,64 @@ interface Props {
   onSelect: (name: string | undefined) => void;
 }
 
-interface StatusData {
-  color: string;
-  bg: string;
-  icon: React.ReactNode;
+function formatTimestamp(value: string | null): string {
+  if (value === null) {
+    return "No runs yet";
+  }
+  const date = new Date(value);
+  return Number.isNaN(date.getTime()) ? "Invalid date" : date.toLocaleString();
 }
 
-const statusConfig: Record<RunStatus, StatusData> = {
-  SUCCESS: {
-    color: "text-emerald-400",
-    bg: "bg-emerald-500/10 border-emerald-500/20",
-    icon: <CheckCircle2 className="w-5 h-5 text-emerald-400" />,
-  },
-  FAILED: {
-    color: "text-rose-400",
-    bg: "bg-rose-500/10 border-rose-500/20",
-    icon: <AlertCircle className="w-5 h-5 text-rose-400" />,
-  },
-  RUNNING: {
-    color: "text-amber-400",
-    bg: "bg-amber-500/10 border-amber-500/20",
-    icon: <Loader2 className="w-5 h-5 text-amber-400 animate-spin" />,
-  },
-  WARNING: {
-    color: "text-amber-300",
-    bg: "bg-amber-500/10 border-amber-500/20",
-    icon: <AlertCircle className="w-5 h-5 text-amber-300" />,
-  },
-};
-
 export const ServiceCard = ({ service, isSelected, onSelect }: Props) => {
-  const config = statusConfig[service.last_status];
-  const formattedTime = new Date(service.last_run_at).toLocaleString();
-
   return (
-    <div
+    <button
+      type="button"
       onClick={() => {
         onSelect(isSelected ? undefined : service.service_name);
       }}
-      className={`p-4 rounded-xl border transition-all cursor-pointer ${
+      aria-pressed={isSelected}
+      className={`w-full rounded-xl border p-4 text-left shadow-sm transition-colors ${
         isSelected
-          ? "border-indigo-500 bg-slate-800 shadow-lg shadow-indigo-500/10"
-          : "border-s{ late-800 bg-slate-800/50 hover:bg-slate-800 hover:borde; }r-slate-700"
+          ? "border-indigo-400 bg-indigo-50 ring-2 ring-indigo-100"
+          : "border-slate-200 bg-white hover:border-indigo-200 hover:bg-slate-50"
       }`}
     >
-      <div className="flex items-center justify-between mb-3">
-        <h3 className="font-semibold text-slate-200 text-lg truncate">
+      <div className="mb-3 flex items-center justify-between gap-3">
+        <h3 className="truncate text-lg font-semibold text-slate-900">
           {service.service_name}
         </h3>
-        <div className={`p-1.5 rounded-lg border ${config.bg}`}>
-          {config.icon}
-        </div>
+        {service.last_status === null ? (
+          <span className="rounded-full border border-slate-200 bg-slate-100 px-2.5 py-1 text-xs font-medium text-slate-600">
+            No status
+          </span>
+        ) : (
+          <StatusBadge status={service.last_status} />
+        )}
       </div>
 
-      <div className="flex items-center gap-2 text-xs text-slate-400 mb-4">
-        <Clock className="w-3.5 h-3.5" />
-        <span>{formattedTime}</span>
+      <div className="mb-4 flex items-center gap-2 text-xs text-slate-500">
+        <Clock3 className="h-3.5 w-3.5" />
+        <span>{formatTimestamp(service.last_run_at)}</span>
       </div>
 
-      <div className="grid grid-cols-2 gap-2 pt-3 border-t border-slate-700/50 text-xs">
+      <div className="grid grid-cols-2 gap-2 border-t border-slate-200 pt-3 text-xs">
         <div>
-          <span className="text-slate-500 block">Total Executions</span>
-          <span className="font-mono text-slate-300 text-sm">
+          <span className="block text-slate-500">Total runs</span>
+          <span className="font-mono text-sm font-medium text-slate-800">
             {service.total_runs}
           </span>
         </div>
         <div>
-          <span className="text-slate-500 block">Failures</span>
+          <span className="block text-slate-500">Failed runs</span>
           <span
-            className={`font-mono text-sm ${service.failed_runs > 0 ? "text-rose-400" : "text-slate-400"}`}
+            className={`font-mono text-sm font-medium ${
+              service.failed_runs > 0 ? "text-rose-700" : "text-slate-600"
+            }`}
           >
             {service.failed_runs}
           </span>
         </div>
       </div>
-    </div>
+    </button>
   );
 };
