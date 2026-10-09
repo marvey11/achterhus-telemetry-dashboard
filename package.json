@@ -16,8 +16,8 @@
   },
   "dependencies": {
     "@marvey11/codescape-ui": "^0.1.0",
-    "@tanstack/react-query": "^5.104.0",
-    "lucide-react": "^1.49.0",
+    "@tanstack/react-query": "^5.104.1",
+    "lucide-react": "^1.52.0",
     "react": "^19.3.0",
     "react-dom": "^19.3.0"
   },
