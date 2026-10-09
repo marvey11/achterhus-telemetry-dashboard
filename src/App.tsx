@@ -10,6 +10,7 @@ import { ServiceCard } from "./components/ServiceCard";
 import { RunsTable } from "./components/RunsTable";
 import { Activity, RefreshCw } from "lucide-react";
 import { useIsFetching } from "@tanstack/react-query";
+import { Button, Label } from "@marvey11/codescape-ui";
 
 const PAGE_SIZE = 50;
 const queryClient = new QueryClient();
@@ -69,7 +70,9 @@ function DashboardContent() {
             </p>
           </div>
         </div>
-        <button
+        <Button
+          variant="outline"
+          size="sm"
           disabled={isFetching}
           onClick={handleRefresh}
           className="flex items-center gap-2 rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs font-medium text-slate-700 shadow-sm transition-colors hover:bg-slate-50 disabled:opacity-50"
@@ -78,7 +81,7 @@ function DashboardContent() {
             className={`w-3.5 h-3.5 ${isFetching ? "animate-spin" : ""}`}
           />
           Refresh
-        </button>
+        </Button>
       </header>
 
       {/* Services Overview Grid */}
@@ -123,7 +126,9 @@ function DashboardContent() {
               : "All Recent Executions"}
           </h2>
           {selectedService !== undefined && (
-            <button
+            <Button
+              variant="ghost"
+              size="sm"
               onClick={() => {
                 setSelectedService(undefined);
                 setPage(1);
@@ -131,12 +136,15 @@ function DashboardContent() {
               className="text-xs font-medium text-indigo-700 hover:underline"
             >
               Clear Filter
-            </button>
+            </Button>
           )}
         </div>
 
         <div className="mb-4 flex flex-wrap items-end gap-3">
-          <label className="flex flex-col gap-1 text-xs font-medium text-slate-600">
+          <Label
+            className="text-xs font-medium text-slate-600"
+            style={{ display: "flex", flexDirection: "column", gap: "0.25rem" }}
+          >
             Status
             <select
               value={selectedStatus}
@@ -153,7 +161,7 @@ function DashboardContent() {
                 </option>
               ))}
             </select>
-          </label>
+          </Label>
           <div className="flex gap-2 text-xs text-slate-500">
             <span className="rounded-full border border-indigo-200 bg-indigo-50 px-2.5 py-1 text-indigo-800">
               In progress: SCHEDULED through RUNNING

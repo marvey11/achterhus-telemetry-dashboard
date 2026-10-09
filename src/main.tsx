@@ -1,3 +1,4 @@
+import "@marvey11/codescape-ui/style.css";
 import "./index.css";
 
 import { StrictMode } from "react";

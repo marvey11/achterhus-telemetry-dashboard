@@ -6,6 +6,7 @@ import {
   ChevronRight as NextIcon,
 } from "lucide-react";
 import { Fragment, useState } from "react";
+import { Button, Card } from "@marvey11/codescape-ui";
 import type { JobRun, RunEvent } from "../api";
 import { fetchRunEvents } from "../api";
 import { StatusBadge } from "./StatusBadge";
@@ -56,7 +57,7 @@ export function RunsTable({ runs, page, canGoNext, onPageChange }: Props) {
         })}
       </div>
 
-      <div className="w-full overflow-x-auto rounded-xl border border-slate-200 bg-white shadow-sm">
+      <Card className="w-full overflow-x-auto rounded-xl p-0 shadow-sm">
         <table className="w-full text-left text-sm text-slate-700">
           <thead className="border-b border-slate-200 bg-slate-50 text-xs uppercase tracking-wider text-slate-600">
             <tr>
@@ -94,7 +95,9 @@ export function RunsTable({ runs, page, canGoNext, onPageChange }: Props) {
                   <tr className="transition-colors hover:bg-slate-50">
                     <td className="p-3 text-slate-500">
                       {hasExtraDetails && (
-                        <button
+                        <Button
+                          variant="ghost"
+                          size="icon"
                           type="button"
                           aria-label={`${isExpanded ? "Hide" : "Show"} details for run ${run.run_id}`}
                           aria-expanded={isExpanded}
@@ -108,7 +111,7 @@ export function RunsTable({ runs, page, canGoNext, onPageChange }: Props) {
                           ) : (
                             <ChevronRight className="h-4 w-4" />
                           )}
-                        </button>
+                        </Button>
                       )}
                     </td>
                     <td className="p-4 font-medium text-slate-900">
@@ -163,13 +166,15 @@ export function RunsTable({ runs, page, canGoNext, onPageChange }: Props) {
             )}
           </tbody>
         </table>
-      </div>
+      </Card>
 
       <nav
         aria-label="Run pages"
         className="mt-4 flex items-center justify-between"
       >
-        <button
+        <Button
+          variant="outline"
+          size="sm"
           type="button"
           disabled={page === 1}
           onClick={() => {
@@ -179,11 +184,13 @@ export function RunsTable({ runs, page, canGoNext, onPageChange }: Props) {
         >
           <ChevronLeft className="h-4 w-4" />
           Previous
-        </button>
+        </Button>
         <span className="text-sm text-slate-600">
           Page {page} · {runs.length} runs shown
         </span>
-        <button
+        <Button
+          variant="outline"
+          size="sm"
           type="button"
           disabled={!canGoNext}
           onClick={() => {
@@ -193,7 +200,7 @@ export function RunsTable({ runs, page, canGoNext, onPageChange }: Props) {
         >
           Next
           <NextIcon className="h-4 w-4" />
-        </button>
+        </Button>
       </nav>
     </div>
   );
