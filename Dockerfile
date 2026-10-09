@@ -1,3 +1,4 @@
+# syntax=docker/dockerfile:1
 FROM node:24-alpine AS builder
 WORKDIR /app
 
@@ -5,7 +6,8 @@ WORKDIR /app
 ARG VITE_BASE_PATH=/
 
 COPY package*.json ./
-RUN npm ci
+COPY .npmrc ./
+RUN --mount=type=secret,id=NODE_AUTH_TOKEN,env=NODE_AUTH_TOKEN npm ci
 
 COPY . .
 

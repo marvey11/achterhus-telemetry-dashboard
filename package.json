@@ -1,7 +1,7 @@
 {
   "name": "@achterhus/telemetry-dashboard",
   "private": true,
-  "version": "0.0.0",
+  "version": "0.1.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -15,6 +15,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@marvey11/codescape-ui": "^0.1.0",
     "@tanstack/react-query": "^5.104.0",
     "lucide-react": "^1.49.0",
     "react": "^19.3.0",
