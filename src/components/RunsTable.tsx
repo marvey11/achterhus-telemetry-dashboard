@@ -47,10 +47,7 @@ export function RunsTable({ runs, page, canGoNext, onPageChange }: Props) {
         {Object.entries(statusCounts).map(([status, count]) => {
           const presentation = getStatusPresentation(status);
           return (
-            <Badge
-              key={status}
-              variant={presentation.variant}
-            >
+            <Badge key={status} variant={presentation.variant}>
               {presentation.label}: {count}
             </Badge>
           );
