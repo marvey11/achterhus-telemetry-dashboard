@@ -6,7 +6,7 @@ import {
   ChevronRight as NextIcon,
 } from "lucide-react";
 import { Fragment, useState } from "react";
-import { Button, Card } from "@marvey11/codescape-ui";
+import { Badge, Button, Card } from "@marvey11/codescape-ui";
 import type { JobRun, RunEvent } from "../api";
 import { fetchRunEvents } from "../api";
 import { StatusBadge } from "./StatusBadge";
@@ -47,12 +47,9 @@ export function RunsTable({ runs, page, canGoNext, onPageChange }: Props) {
         {Object.entries(statusCounts).map(([status, count]) => {
           const presentation = getStatusPresentation(status);
           return (
-            <span
-              key={status}
-              className={`rounded-full border px-2.5 py-1 text-xs font-medium ${presentation.className}`}
-            >
+            <Badge key={status} variant={presentation.variant}>
               {presentation.label}: {count}
-            </span>
+            </Badge>
           );
         })}
       </div>
