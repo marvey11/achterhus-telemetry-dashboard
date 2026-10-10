@@ -5,7 +5,13 @@ import {
   useQuery,
   useQueryClient,
 } from "@tanstack/react-query";
-import { fetchOverview, fetchRecentRuns, RUN_STATUSES } from "./api";
+import {
+  fetchOverview,
+  fetchRecentRuns,
+  getSinceCutoff,
+  RUN_STATUSES,
+  type TimeRange,
+} from "./api";
 import { ServiceCard } from "./components/ServiceCard";
 import { RunsTable } from "./components/RunsTable";
 import { Activity, RefreshCw } from "lucide-react";
@@ -20,6 +26,7 @@ function DashboardContent() {
     undefined,
   );
   const [selectedStatus, setSelectedStatus] = useState("");
+  const [timeRange, setTimeRange] = useState<TimeRange>("all");
   const [page, setPage] = useState(1);
 
   // Poll the overview and current run page every five seconds.
@@ -28,8 +35,8 @@ function DashboardContent() {
     isLoading: overviewLoading,
     error: overviewError,
   } = useQuery({
-    queryKey: ["overview"],
-    queryFn: fetchOverview,
+    queryKey: ["overview", timeRange],
+    queryFn: () => fetchOverview(getSinceCutoff(timeRange)),
     refetchInterval: 5000,
   });
 
@@ -38,9 +45,15 @@ function DashboardContent() {
     isLoading: runsLoading,
     error: runsError,
   } = useQuery({
-    queryKey: ["runs", selectedService, selectedStatus, page],
+    queryKey: ["runs", selectedService, selectedStatus, timeRange, page],
     queryFn: () =>
-      fetchRecentRuns(selectedService, selectedStatus, PAGE_SIZE, page),
+      fetchRecentRuns(
+        selectedService,
+        selectedStatus,
+        PAGE_SIZE,
+        page,
+        getSinceCutoff(timeRange),
+      ),
     refetchInterval: 5000,
   });
 
@@ -141,6 +154,25 @@ function DashboardContent() {
         </div>
 
         <div className="mb-4 flex flex-wrap items-end gap-3">
+          <Label
+            className="text-xs font-medium text-slate-600"
+            style={{ display: "flex", flexDirection: "column", gap: "0.25rem" }}
+          >
+            Time range
+            <select
+              value={timeRange}
+              onChange={(event) => {
+                setTimeRange(event.target.value as TimeRange);
+                setPage(1);
+              }}
+              className="min-w-48 rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-800 shadow-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
+            >
+              <option value="all">All time</option>
+              <option value="24-hours">Last 24 hours</option>
+              <option value="7-days">Last 7 days</option>
+              <option value="month">Last month</option>
+            </select>
+          </Label>
           <Label
             className="text-xs font-medium text-slate-600"
             style={{ display: "flex", flexDirection: "column", gap: "0.25rem" }}
