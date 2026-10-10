@@ -59,12 +59,24 @@ describe("dashboard run filters and pagination", () => {
 
     await screen.findByRole("button", { name: /newsletter-worker/i });
     await waitFor(() => {
-      expect(fetchRecentRuns).toHaveBeenCalledWith(undefined, "", 50, 1);
+      expect(fetchRecentRuns).toHaveBeenCalledWith(
+        undefined,
+        "",
+        50,
+        1,
+        undefined,
+      );
     });
 
     fireEvent.click(screen.getByRole("button", { name: "Next" }));
     await screen.findByText("Page 2 · 0 runs shown");
-    expect(fetchRecentRuns).toHaveBeenLastCalledWith(undefined, "", 50, 2);
+    expect(fetchRecentRuns).toHaveBeenLastCalledWith(
+      undefined,
+      "",
+      50,
+      2,
+      undefined,
+    );
 
     fireEvent.change(screen.getByLabelText("Status"), {
       target: { value: "TIMEOUT" },
@@ -75,6 +87,7 @@ describe("dashboard run filters and pagination", () => {
         "TIMEOUT",
         50,
         1,
+        undefined,
       );
     });
 
@@ -87,6 +100,32 @@ describe("dashboard run filters and pagination", () => {
         "TIMEOUT",
         50,
         1,
+        undefined,
+      );
+    });
+  });
+
+  test("resets pagination and filters both endpoints when the time range changes", async () => {
+    render(<App />);
+
+    await screen.findByRole("button", { name: /newsletter-worker/i });
+    fireEvent.click(screen.getByRole("button", { name: "Next" }));
+    await screen.findByText("Page 2 · 0 runs shown");
+
+    fireEvent.change(screen.getByLabelText("Time range"), {
+      target: { value: "7-days" },
+    });
+
+    await waitFor(() => {
+      expect(fetchRecentRuns).toHaveBeenLastCalledWith(
+        undefined,
+        "",
+        50,
+        1,
+        expect.stringMatching(/^\d{4}-\d\d-\d\dT/),
+      );
+      expect(fetchOverview).toHaveBeenLastCalledWith(
+        expect.stringMatching(/^\d{4}-\d\d-\d\dT/),
       );
     });
   });

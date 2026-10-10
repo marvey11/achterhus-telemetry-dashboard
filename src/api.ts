@@ -16,6 +16,29 @@ export const RUN_STATUSES = [
 export type KnownRunStatus = (typeof RUN_STATUSES)[number];
 export type RunStatus = KnownRunStatus | (string & {});
 
+export type TimeRange = "all" | "24-hours" | "7-days" | "month";
+
+export function getSinceCutoff(
+  range: TimeRange,
+  now = new Date(),
+): string | undefined {
+  if (range === "all") return undefined;
+
+  const cutoff = new Date(now);
+  if (range === "24-hours") cutoff.setUTCDate(cutoff.getUTCDate() - 1);
+  else if (range === "7-days") cutoff.setUTCDate(cutoff.getUTCDate() - 7);
+  else {
+    const day = cutoff.getUTCDate();
+    cutoff.setUTCDate(1);
+    cutoff.setUTCMonth(cutoff.getUTCMonth() - 1);
+    const lastDay = new Date(
+      Date.UTC(cutoff.getUTCFullYear(), cutoff.getUTCMonth() + 1, 0),
+    ).getUTCDate();
+    cutoff.setUTCDate(Math.min(day, lastDay));
+  }
+  return cutoff.toISOString();
+}
+
 export interface JobRun {
   id: number;
   service_name: string;
@@ -64,8 +87,13 @@ export class ApiError extends Error {
 const apiBaseUrl: unknown = import.meta.env.VITE_API_BASE_URL;
 const API_BASE_URL = typeof apiBaseUrl === "string" ? apiBaseUrl : "";
 
-export async function fetchOverview(): Promise<ServiceOverview[]> {
-  const response = await fetch(`${API_BASE_URL}/api/v1/overview`);
+export async function fetchOverview(
+  since?: string,
+): Promise<ServiceOverview[]> {
+  const params = new URLSearchParams();
+  if (isNonEmptyString(since)) params.set("since", since);
+  const query = params.toString() ? `?${params}` : "";
+  const response = await fetch(`${API_BASE_URL}/api/v1/overview${query}`);
   if (!response.ok) {
     throw new ApiError("Failed to fetch service overview", response.status);
   }
@@ -78,6 +106,7 @@ export async function fetchRecentRuns(
   statusFilter?: string,
   limit = 50,
   page = 1,
+  since?: string,
 ): Promise<JobRun[]> {
   const params = new URLSearchParams({
     limit: String(limit),
@@ -90,6 +119,7 @@ export async function fetchRecentRuns(
   if (isNonEmptyString(statusFilter)) {
     params.set("status", statusFilter);
   }
+  if (isNonEmptyString(since)) params.set("since", since);
 
   const response = await fetch(`${API_BASE_URL}/api/v1/runs?${params}`);
   if (!response.ok) {

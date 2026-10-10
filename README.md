@@ -25,8 +25,10 @@ VITE_API_BASE_URL=http://localhost:8000
 ```
 
 The API must expose the versioned endpoints for the service overview, runs and run
-events. Run history uses a page size of 50; changing service or status filters
-returns to the first page.
+events. Run history uses a page size of 50. The time range filters both the service
+overview and runs to all time, the last 24 hours, the last 7 days or the last month.
+Changing the time range, service or status filter returns to the first page; run
+pagination is applied within the selected time range.
 
 ## Checks
 
