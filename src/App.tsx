@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useLocalStorage } from "@marvey11/codescape-react-utils";
 import {
   QueryClient,
   QueryClientProvider,
@@ -26,7 +27,10 @@ function DashboardContent() {
     undefined,
   );
   const [selectedStatus, setSelectedStatus] = useState("");
-  const [timeRange, setTimeRange] = useState<TimeRange>("all");
+  const [timeRange, setTimeRange] = useLocalStorage<TimeRange>(
+    "telemetry-dashboard-time-range",
+    "all",
+  );
   const [page, setPage] = useState(1);
 
   // Poll the overview and current run page every five seconds.
