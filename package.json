@@ -17,10 +17,10 @@
   "dependencies": {
     "@marvey11/codescape-react-utils": "^0.1.0",
     "@marvey11/codescape-ui": "^0.1.0",
-    "@tanstack/react-query": "^5.104.1",
-    "lucide-react": "^1.53.0",
-    "react": "^19.3.0",
-    "react-dom": "^19.3.0"
+    "@tanstack/react-query": "^5.104.3",
+    "lucide-react": "^1.57.0",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1"
   },
   "devDependencies": {
     "@eslint-react/eslint-plugin": "^5.24.9",
