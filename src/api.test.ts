@@ -25,7 +25,7 @@ describe("fetchRecentRuns", () => {
       String(fetchMock.mock.calls[0]?.[0]),
       "http://localhost",
     );
-    expect(requestUrl.pathname).toBe("/api/v1/runs");
+    expect(requestUrl.pathname).toBe("/api/v1/telemetry/runs");
     expect(requestUrl.searchParams.get("service_name")).toBe(
       "newsletter-worker",
     );
@@ -94,7 +94,7 @@ describe("time range filtering", () => {
       String(fetchMock.mock.calls[0]?.[0]),
       "http://localhost",
     );
-    expect(requestUrl.pathname).toBe("/api/v1/overview");
+    expect(requestUrl.pathname).toBe("/api/v1/telemetry/overview");
     expect(requestUrl.searchParams.get("since")).toBe(
       "2026-10-09T12:00:00.000Z",
     );

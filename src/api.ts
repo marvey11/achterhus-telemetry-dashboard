@@ -93,7 +93,7 @@ export async function fetchOverview(
   const params = new URLSearchParams();
   if (isNonEmptyString(since)) params.set("since", since);
   const query = params.toString() ? `?${params}` : "";
-  const response = await fetch(`${API_BASE_URL}/api/v1/overview${query}`);
+  const response = await fetch(`${API_BASE_URL}/api/v1/telemetry/overview${query}`);
   if (!response.ok) {
     throw new ApiError("Failed to fetch service overview", response.status);
   }
@@ -121,7 +121,7 @@ export async function fetchRecentRuns(
   }
   if (isNonEmptyString(since)) params.set("since", since);
 
-  const response = await fetch(`${API_BASE_URL}/api/v1/runs?${params}`);
+  const response = await fetch(`${API_BASE_URL}/api/v1/telemetry/runs?${params}`);
   if (!response.ok) {
     throw new ApiError("Failed to fetch runs", response.status);
   }
@@ -131,7 +131,7 @@ export async function fetchRecentRuns(
 
 export async function fetchRunEvents(runId: string): Promise<RunEvent[]> {
   const response = await fetch(
-    `${API_BASE_URL}/api/v1/runs/${encodeURIComponent(runId)}/events`,
+    `${API_BASE_URL}/api/v1/telemetry/runs/${encodeURIComponent(runId)}/events`,
   );
   if (!response.ok) {
     const message =
