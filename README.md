@@ -8,7 +8,7 @@ designed for a light theme.
 ## Requirements
 
 - Node.js and npm
-- The Achterhus Telemetry API, or a compatible API at `/api/v1`
+- The Achterhus Telemetry API, or a compatible API at `/api/v1/telemetry`
 
 ## Local development
 
