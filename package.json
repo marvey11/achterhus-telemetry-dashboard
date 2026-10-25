@@ -17,8 +17,8 @@
   "dependencies": {
     "@marvey11/codescape-react-utils": "^0.1.0",
     "@marvey11/codescape-ui": "^0.1.0",
-    "@tanstack/react-query": "^5.104.3",
-    "lucide-react": "^1.57.0",
+    "@tanstack/react-query": "^5.104.5",
+    "lucide-react": "^1.61.0",
     "react": "^19.3.1",
     "react-dom": "^19.3.1"
   },
