@@ -44,11 +44,14 @@ jobs:
       - name: Lint
         run: npm run lint
 
+      - name: Markdown lint
+        run: npm run lint:md
+
+      - name: Run tests
+        run: npm run test:run
+
       - name: Build
         run: npm run build
-
-      # - name: Run tests
-      #   run: npm test
 
   docker-build-and-push:
     runs-on: ubuntu-latest

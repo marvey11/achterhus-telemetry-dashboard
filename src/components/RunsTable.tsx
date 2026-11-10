@@ -1,12 +1,17 @@
 import { useQuery } from "@tanstack/react-query";
 import {
   ChevronDown,
-  ChevronRight,
   ChevronLeft,
+  ChevronRight,
   ChevronRight as NextIcon,
 } from "lucide-react";
-import { Fragment, useState } from "react";
-import { Badge, Button, Card } from "@marvey11/codescape-ui";
+import { useState } from "react";
+import {
+  Badge,
+  Button,
+  DataTable,
+  type DataTableColumn,
+} from "@marvey11/codescape-ui";
 import type { JobRun, RunEvent } from "../api";
 import { fetchRunEvents } from "../api";
 import { StatusBadge } from "./StatusBadge";
@@ -38,6 +43,94 @@ export function RunsTable({ runs, page, canGoNext, onPageChange }: Props) {
     return counts;
   }, {});
 
+  const columns: DataTableColumn<JobRun>[] = [
+    {
+      key: "details-toggle",
+      header: <span className="sr-only">Run details</span>,
+      className: "w-12 p-3 text-slate-500 align-middle",
+      render: (run) => {
+        const isExpanded = expandedRunId === run.id;
+        const hasExtraDetails =
+          run.error_message !== null ||
+          run.error_details !== null ||
+          run.logs_summary !== null ||
+          Object.keys(run.metrics).length > 0;
+
+        if (!hasExtraDetails) {
+          return null;
+        }
+
+        return (
+          <Button
+            variant="ghost"
+            size="icon"
+            type="button"
+            aria-label={`${isExpanded ? "Hide" : "Show"} details for run ${run.run_id}`}
+            aria-expanded={isExpanded}
+            onClick={() => {
+              setExpandedRunId(isExpanded ? null : run.id);
+            }}
+            className="rounded p-1 hover:bg-slate-200"
+          >
+            {isExpanded ? (
+              <ChevronDown className="h-4 w-4" />
+            ) : (
+              <ChevronRight className="h-4 w-4" />
+            )}
+          </Button>
+        );
+      },
+    },
+    {
+      key: "service_name",
+      header: "Service",
+      className: "p-4 font-medium text-slate-900",
+      accessor: (run) => run.service_name,
+    },
+    {
+      key: "status",
+      header: "Status",
+      className: "p-4",
+      render: (run) => <StatusBadge status={run.status} />,
+    },
+    {
+      key: "started_at",
+      header: "Started at",
+      className: "p-4 text-slate-600",
+      render: (run) => formatTimestamp(run.started_at),
+    },
+    {
+      key: "duration_seconds",
+      header: "Duration",
+      className: "p-4 font-mono text-slate-600",
+      render: (run) =>
+        run.duration_seconds === null
+          ? "Not available"
+          : `${run.duration_seconds.toFixed(2)}s`,
+    },
+    {
+      key: "metrics",
+      header: "Metrics",
+      className: "p-4",
+      render: (run) => (
+        <div className="flex flex-wrap gap-1.5">
+          {Object.entries(run.metrics).map(([key, value]) => (
+            <span
+              key={key}
+              className="rounded bg-slate-100 px-2 py-0.5 font-mono text-xs text-slate-700"
+            >
+              {key}:{" "}
+              <strong className="text-indigo-800">{String(value)}</strong>
+            </span>
+          ))}
+          {Object.keys(run.metrics).length === 0 && (
+            <span className="text-slate-400">None</span>
+          )}
+        </div>
+      ),
+    },
+  ];
+
   return (
     <div>
       <div className="mb-3 flex flex-wrap items-center gap-2">
@@ -54,116 +147,25 @@ export function RunsTable({ runs, page, canGoNext, onPageChange }: Props) {
         })}
       </div>
 
-      <Card className="w-full overflow-x-auto rounded-xl p-0 shadow-sm">
-        <table className="w-full text-left text-sm text-slate-700">
-          <thead className="border-b border-slate-200 bg-slate-50 text-xs uppercase tracking-wider text-slate-600">
-            <tr>
-              <th scope="col" className="w-12 p-4">
-                <span className="sr-only">Run details</span>
-              </th>
-              <th scope="col" className="p-4">
-                Service
-              </th>
-              <th scope="col" className="p-4">
-                Status
-              </th>
-              <th scope="col" className="p-4">
-                Started at
-              </th>
-              <th scope="col" className="p-4">
-                Duration
-              </th>
-              <th scope="col" className="p-4">
-                Metrics
-              </th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-slate-100">
-            {runs.map((run) => {
-              const isExpanded = expandedRunId === run.id;
-              const hasExtraDetails =
-                run.error_message !== null ||
-                run.error_details !== null ||
-                run.logs_summary !== null ||
-                Object.keys(run.metrics).length > 0;
-
-              return (
-                <Fragment key={run.id}>
-                  <tr className="transition-colors hover:bg-slate-50">
-                    <td className="p-3 text-slate-500">
-                      {hasExtraDetails && (
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          type="button"
-                          aria-label={`${isExpanded ? "Hide" : "Show"} details for run ${run.run_id}`}
-                          aria-expanded={isExpanded}
-                          onClick={() => {
-                            setExpandedRunId(isExpanded ? null : run.id);
-                          }}
-                          className="rounded p-1 hover:bg-slate-200"
-                        >
-                          {isExpanded ? (
-                            <ChevronDown className="h-4 w-4" />
-                          ) : (
-                            <ChevronRight className="h-4 w-4" />
-                          )}
-                        </Button>
-                      )}
-                    </td>
-                    <td className="p-4 font-medium text-slate-900">
-                      {run.service_name}
-                    </td>
-                    <td className="p-4">
-                      <StatusBadge status={run.status} />
-                    </td>
-                    <td className="p-4 text-slate-600">
-                      {formatTimestamp(run.started_at)}
-                    </td>
-                    <td className="p-4 font-mono text-slate-600">
-                      {run.duration_seconds === null
-                        ? "Not available"
-                        : `${run.duration_seconds.toFixed(2)}s`}
-                    </td>
-                    <td className="p-4">
-                      <div className="flex flex-wrap gap-1.5">
-                        {Object.entries(run.metrics).map(([key, value]) => (
-                          <span
-                            key={key}
-                            className="rounded bg-slate-100 px-2 py-0.5 font-mono text-xs text-slate-700"
-                          >
-                            {key}:{" "}
-                            <strong className="text-indigo-800">
-                              {String(value)}
-                            </strong>
-                          </span>
-                        ))}
-                        {Object.keys(run.metrics).length === 0 && (
-                          <span className="text-slate-400">None</span>
-                        )}
-                      </div>
-                    </td>
-                  </tr>
-                  {isExpanded && (
-                    <tr className="bg-slate-50">
-                      <td colSpan={6} className="p-4 sm:pl-14">
-                        <RunDetails run={run} />
-                      </td>
-                    </tr>
-                  )}
-                </Fragment>
-              );
-            })}
-            {runs.length === 0 && (
-              <tr>
-                <td colSpan={6} className="p-8 text-center text-slate-500">
-                  No runs match these filters.
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
-      </Card>
+      <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+        <DataTable
+          columns={columns}
+          data={runs}
+          rowKey={(run) => run.id}
+          className="w-full border-separate border-spacing-0 text-left text-sm text-slate-700"
+          emptyState={
+            <div className="p-8 text-center text-slate-500">
+              No runs match these filters.
+            </div>
+          }
+          renderExpandedRow={(run) => {
+            if (expandedRunId !== run.id) {
+              return null;
+            }
+            return <RunDetails run={run} />;
+          }}
+        />
+      </div>
 
       <nav
         aria-label="Run pages"
