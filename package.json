@@ -45,7 +45,7 @@
     "globals": "^17.14.0",
     "husky": "^9.1.7",
     "jsdom": "^31.0.0",
-    "lint-staged": "^16.0.0",
+    "lint-staged": "^17.6.0",
     "markdownlint-cli2": "^0.24.1",
     "prettier": "^3.10.1",
     "tailwindcss": "^4.3.3",
