@@ -9,8 +9,11 @@ registries:
 updates:
   - package-ecosystem: "npm"
     directory: "/"
+    registries:
+      - github-packages
     schedule:
       interval: "weekly"
+
     groups:
       dev-dependencies:
         dependency-type: "development"
